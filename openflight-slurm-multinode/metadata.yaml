@@ -24,6 +24,10 @@ questions:
         depend_on:
           - ipa
         where: true
+      - identity: storage
+        depend_on:
+          - ipa
+        where: true
     questions:
       - id: ipa_domain
         env: IPA_DOMAIN
@@ -69,6 +73,17 @@ questions:
       - "curl -s --fail http://169.254.169.254/latest/meta-data/public-ipv4" # IP from AWS/OpenStack Metadata
       - "curl -s --fail -H Metadata:true http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0?api-version=2021-12-13 |sed 's/.*publicIpAddress\":\"//g;s/\".*//g'" # IP from Azure Metadata
       - "curl -s ifconfig.me" # External IP curl 
+    validation:
+      type: string
+      format: "^(\\S)+$"
+      message: "Cannot be empty or contain whitespace"
+  - id: nfs_server
+    env: NFS_SERVER
+    text: 'Default NFS server (hostname or flight-hunter label - **MUST** match name to be used with "profile apply"):'
+    default: 'login1'
+    default_smart:
+      - "/opt/flight/bin/flight hunter list --plain |grep $(hostname -f) |awk '{print $5}'"
+      - "hostname -s"
     validation:
       type: string
       format: "^(\\S)+$"
